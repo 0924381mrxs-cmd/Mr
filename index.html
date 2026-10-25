@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>واجهة مصرفية تجريبية</title>
+
+<style>
+:root {
+  --red: #e3182b;
+  --dark-red: #b51020;
+  --pink: #e99499;
+  --border: #d5d5d5;
+  --text: #222;
+  --green: #159447;
+  --page: #f8f8f8;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin:0; padding:0; width:100%; min-height:100%; }
+body {
+  background:#fff;
+  color:var(--text);
+  font-family:Tahoma, Arial, sans-serif;
+  font-size:14px;
+  overflow-x:hidden;
+}
+button, input { font:inherit; }
+button { cursor:pointer; }
+.screen { display:none; width:100%; background:#fff; }
+.screen.active { display:block; }
+svg { display:block; }
+.icon { width:35px; height:35px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.icon-fill { width:35px; height:35px; fill:currentColor; }
+
+/* الشعار */
+.brand { width:112px; height:66px; }
+.brand text { font-family:Tahoma, Arial, sans-serif; font-weight:bold; }
+
+/* شاشة الدخول: عناصر بمقاسات محدودة وليست متمددة */
+.login-screen {
+  position:relative;
+  min-height:780px;
+  background:linear-gradient(to bottom,
+    #ff0909 0, #ff0909 155px,
+    #df182b 280px, #c51b30 350px,
+    #fff 350px, #fff 100%);
+  padding-top:1px;
+}
+.language {
+  position:absolute; top:14px; right:17px;
+  width:40px; height:40px; border:2px solid white;
+  border-radius:6px; color:white; background:transparent;
+  font-weight:bold; font-size:17px;
+}
+.login-brand { display:block; width:210px; height:100px; margin:65px auto 0; }
+.login-form { margin:42px 21px 0; }
+.field {
+  height:70px; display:flex; align-items:center; gap:12px;
+  border:1.5px solid #aaa; border-radius:14px;
+  background:#fff; box-shadow:0 2px 4px #0002;
+  padding:0 12px; margin-bottom:22px;
+}
+.field-icon { width:36px; height:36px; color:#555; flex-shrink:0; }
+.field input {
+  width:100%; min-width:0; height:100%;
+  border:0; outline:0; background:transparent;
+  color:#444; font-size:17px; text-align:right;
+}
+.field input::placeholder { color:#aaa; opacity:1; }
+.login-btn {
+  display:block; width:95%; height:65px; margin:64px auto 0;
+  color:#fff; font-weight:bold; font-size:26px;
+  border:3px solid #a80e19; border-radius:15px;
+  background:linear-gradient(#f6aaaa,#ed555c 45%,#ef101b);
+  box-shadow:0 4px 6px #0004, inset 0 1px 1px #fff9;
+}
+.login-links {
+  margin-top:40px; display:flex; justify-content:space-between;
+  color:#aaa; font-size:15px; gap:10px;
+}
+.qr-row { margin-top:28px; display:flex; align-items:center; gap:10px; color:#aaa; }
+.qr-row svg { width:38px; height:38px; color:#c91d2e; }
+.login-footer {
+  display:flex; justify-content:center; gap:42px;
+  margin:38px auto 20px; padding-bottom:10px;
+}
+.footer-item { color:#999; font-size:12px; text-align:center; }
+.footer-circle {
+  width:43px; height:43px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 6px; color:#fff; box-shadow:0 2px 4px #0003;
+}
+.footer-circle svg { width:24px; height:24px; }
+.footer-red { background:#dc2929; }
+.footer-green { background:#a8d62b; }
+.footer-blue { background:#345c98; }
+
+/* ترويسة الصفحات */
+.header {
+  height:126px; position:relative;
+  display:flex; justify-content:center; align-items:center;
+  background:linear-gradient(#ff0808,#d5192d);
+}
+.header .brand { width:108px; }
+.header-action {
+  position:absolute; top:43px; color:#fff; background:transparent;
+  padding:0; border:0;
+}
+.header-info {
+  left:22px; width:38px; height:38px;
+  border-radius:50%; background:#fff; color:#d51a2b;
+  font:bold italic 26px Georgia,serif;
+}
+.header-menu { right:22px; width:35px; }
+.header-menu span {
+  display:block; height:4px; border-radius:3px;
+  margin:6px 0; background:white;
+}
+.header-power { left:20px; font-size:28px; }
+.header-bell { right:22px; }
+.header-bell svg { width:28px; height:28px; }
+
+/* الرئيسية */
+.home-screen { background:var(--page); }
+.greeting {
+  min-height:62px; display:flex; align-items:center; gap:5px;
+  padding:0 20px; background:#fff; border-bottom:1px solid #eee;
+  font-size:17px;
+}
+.greeting strong { font-weight:bold; }
+.services {
+  padding:29px 24px 55px;
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  column-gap:20px; row-gap:39px;
+}
+.service {
+  min-width:0; padding:0; background:transparent; color:#171717;
+  text-align:center; font-size:14px;
+}
+.service-icon {
+  width:64px; height:64px; margin:0 auto;
+  border:2px solid #a50f1c; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff;
+  background:linear-gradient(to bottom,#efa5a8 0%,#e66d73 47%,#e51b28 48%,#eb1722 100%);
+  box-shadow:0 3px 5px #0005;
+}
+.service-icon svg { width:37px; height:37px; }
+.service-title { margin-top:12px; line-height:1.35; }
+
+/* عناوين الصفحات */
+.page-title {
+  height:88px; display:flex; justify-content:center; align-items:center;
+  position:relative; background:#fff; font-size:23px;
+}
+.back-btn {
+  position:absolute; right:15px; top:18px;
+  height:41px; min-width:73px; padding:0 8px;
+  border:1.5px solid #a40e1b; border-radius:9px;
+  color:#c61a2a; background:#fff; font-size:16px;
+  box-shadow:0 2px 4px #0003;
+}
+
+/* تفاصيل الحساب */
+.accounts { padding:9px 13px 55px; }
+.account-card {
+  margin-bottom:35px; border:1px solid #ddd; background:#fff;
+  box-shadow:0 3px 6px #0002;
+}
+.account-main {
+  min-height:96px; display:flex; align-items:center;
+  padding:9px 8px; border-bottom:1px solid #c8c8c8; gap:7px;
+}
+.account-symbol { width:42px; flex:0 0 42px; color:#cb1d2e; }
+.account-symbol svg { width:37px; height:37px; }
+.account-data { flex:1; min-width:0; text-align:right; }
+.account-name { color:#a52534; font-size:16px; margin-bottom:8px; }
+.account-number { color:#96333d; font-size:11px; line-height:1.55; overflow-wrap:anywhere; }
+.account-balance {
+  color:var(--green); direction:ltr; white-space:nowrap;
+  font-size:17px; font-weight:normal; padding-left:3px;
+  font-variant-numeric:tabular-nums;
+}
+.account-actions { display:grid; grid-template-columns:1fr 1fr; min-height:51px; }
+.account-action {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:5px 3px; color:#222; background:#fff;
+  font-size:12px; font-weight:bold; border-left:1px solid #ccc;
+}
+.account-action:last-child { border-left:0; }
+.account-action svg { width:25px; height:25px; flex-shrink:0; }
+
+/* الفواتير */
+.bill-tabs { display:grid; grid-template-columns:1fr 1fr; height:68px; }
+.bill-tab { background:#d51b2b; color:#fff; font-weight:bold; font-size:22px; }
+.bill-tab.active { background:linear-gradient(#ff0808,#d51b2b); }
+.bill-grid {
+  padding:24px 17px 55px; display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr)); gap:25px 28px;
+}
+.bill-card {
+  position:relative; min-width:0; height:112px; overflow:hidden;
+  border:2px solid #a50e19; border-radius:23px; color:#fff;
+  background:linear-gradient(to bottom,#efb2b4 0%,#df777d 48%,#e71b26 49%,#e91b25 100%);
+  box-shadow:0 4px 6px #0004;
+}
+.bill-name {
+  position:absolute; top:10px; right:7px; left:5px;
+  font-size:14px; text-align:right; white-space:nowrap;
+}
+.bill-icon-circle {
+  position:absolute; left:17px; bottom:14px; width:38px; height:38px;
+  border-radius:50%; background:#fff; color:#df2029;
+  display:flex; align-items:center; justify-content:center;
+}
+.bill-icon-circle svg { width:23px; height:23px; }
+
+/* التحويلات */
+.transfer-list { padding:24px 15px 50px; }
+.transfer-card {
+  min-height:80px; margin-bottom:24px; padding:0 14px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:#fff; border:1px solid #ddd; box-shadow:0 3px 5px #0002;
+  font-size:17px; text-align:right;
+}
+.transfer-card svg { width:36px; height:36px; color:#c61b2c; flex-shrink:0; }
+.transfer-arrow { font-size:25px; color:#b71c2a; }
+
+/* نافذة الرسائل */
+.modal {
+  display:none; position:fixed; inset:0; z-index:20;
+  background:#0008; align-items:center; justify-content:center; padding:20px;
+}
+.modal.show { display:flex; }
+.modal-box {
+  width:100%; max-width:340px; border-radius:15px; background:#fff;
+  padding:23px; text-align:center; box-shadow:0 7px 25px #0004;
+}
+.modal-box h3 { margin-top:0; color:#c7192b; font-size:21px; }
+.modal-box p { line-height:1.7; font-size:15px; }
+.modal-box button {
+  width:100%; height:43px; color:#fff; background:#d51b2b;
+  border-radius:8px; font-size:16px;
+}
+
+@media (max-width:360px) {
+  .services { padding-right:15px; padding-left:15px; column-gap:12px; }
+  .service-icon { width:58px; height:58px; }
+  .service-icon svg { width:33px; height:33px; }
+  .service { font-size:12px; }
+  .bill-grid { gap:20px 14px; padding-right:12px; padding-left:12px; }
+  .bill-name { font-size:12px; }
+  .account-name { font-size:14px; }
+  .account-balance { font-size:15px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- رسومات SVG أصلية مضمّنة داخل الملف -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="person" viewBox="0 0 48 48">
+    <circle cx="24" cy="13" r="8"/>
+    <path d="M8 42c1-11 6-17 16-17s15 6 16 17"/>
+    <path d="M3 20h9M3 26h7"/>
+  </symbol>
+  <symbol id="eye" viewBox="0 0 48 48">
+    <path d="M3 24s7-13 21-13 21 13 21 13-7 13-21 13S3 24 3 24z"/>
+    <circle cx="24" cy="24" r="6"/>
+  </symbol>
+  <symbol id="document" viewBox="0 0 48 48">
+    <path d="M10 4h19l9 9v31H10z"/>
+    <path d="M29 4v10h9M16 22h16M16 29h16M16 36h11"/>
+  </symbol>
+  <symbol id="transfer" viewBox="0 0 48 48">
+    <path d="M8 16h29l-6-6M40 32H11l6 6"/>
+    <path d="M37 16l-6 6M11 32l6-6"/>
+  </symbol>
+  <symbol id="cash" viewBox="0 0 48 48">
+    <rect x="5" y="10" width="38" height="28" rx="3"/>
+    <circle cx="24" cy="24" r="7"/>
+    <path d="M10 16h4M34 32h4"/>
+  </symbol>
+  <symbol id="qr" viewBox="0 0 48 48">
+    <path d="M4 4h14v14H4zM30 4h14v14H30zM4 30h14v14H4z"/>
+    <path d="M9 9h4v4H9zM35 9h4v4H35zM9 35h4v4H9zM25 25h5v5h-5zM33 25h5v5h-5zM25 34h5v5h-5zM34 35h10v9H34z"/>
+  </symbol>
+  <symbol id="deposit" viewBox="0 0 48 48">
+    <path d="M5 18L24 7l19 11M9 20h30M12 22v15M20 22v15M28 22v15M36 22v15M6 39h36"/>
+    <circle cx="24" cy="29" r="5"/>
+  </symbol>
+  <symbol id="beneficiaries" viewBox="0 0 48 48">
+    <circle cx="18" cy="14" r="7"/><path d="M4 39c1-9 5-14 14-14 6 0 10 3 12 8"/>
+    <circle cx="34" cy="29" r="6"/><path d="M27 43c1-6 3-9 8-9s8 3 9 9"/>
+  </symbol>
+  <symbol id="card" viewBox="0 0 48 48">
+    <rect x="4" y="9" width="40" height="30" rx="3"/>
+    <path d="M4 18h40M10 29h12"/>
+  </symbol>
+  <symbol id="settings" viewBox="0 0 48 48">
+    <circle cx="24" cy="24" r="8"/>
+    <path d="M20 4h8l2 6 5 2 5-2 4 7-4 4v6l4 4-4 7-5-2-5 2-2 6h-8l-2-6-5-2-5 2-4-7 4-4v-6l-4-4 4-7 5 2 5-2z"/>
+  </symbol>
+  <symbol id="shop" viewBox="0 0 48 48">
+    <path d="M5 18h38l-4 25H9zM3 18l5-12h32l5 12"/>
+    <path d="M17 43V29h14v14M5 18c0 7 10 7 10 0 0 7 10 7 10 0 0 7 10 7 10 0 0 7 10 7 10 0"/>
+  </symbol>
+  <symbol id="electric" viewBox="0 0 48 48">
+    <path d="M27 3L9 27h12l-2 18 20-27H26z" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="plane" viewBox="0 0 48 48">
+    <path d="M3 27l18-4L17 5l5-2 11 18 11-3 2 5-13 8-3 13-4 1-3-12-14 3z" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="education" viewBox="0 0 48 48">
+    <path d="M3 17L24 6l21 11-21 11z" fill="currentColor" stroke="none"/>
+    <path d="M11 23v10c7 7 19 7 26 0V23M44 18v14"/>
+  </symbol>
+  <symbol id="house" viewBox="0 0 48 48">
+    <path d="M4 22L24 5l20 17M9 19v24h30V19M19 43V28h10v15"/>
+  </symbol>
+  <symbol id="cart" viewBox="0 0 48 48">
+    <path d="M3 6h6l6 28h24l6-20H12"/>
+    <circle cx="19" cy="41" r="3"/><circle cx="36" cy="41" r="3"/>
+  </symbol>
+  <symbol id="fuel" viewBox="0 0 48 48">
+    <path d="M7 43V5h23v38M4 43h29M12 11h13v12H12zM30 13h6l6 7v15h-7"/>
+  </symbol>
+  <symbol id="truck" viewBox="0 0 48 48">
+    <path d="M3 10h27v25H3zM30 20h8l7 8v7H30z"/>
+    <circle cx="12" cy="38" r="4"/><circle cx="37" cy="38" r="4"/>
+  </symbol>
+  <symbol id="gift" viewBox="0 0 48 48">
+    <path d="M5 20h38v24H5zM3 14h42v8H3zM24 14v30"/>
+    <path d="M24 14C9 14 7 3 15 3c6 0 9 11 9 11M24 14c15 0 17-11 9-11-6 0-9 11-9 11"/>
+  </symbol>
+  <symbol id="internet" viewBox="0 0 48 48">
+    <path d="M4 17Q24-1 44 17M10 24q14-13 28 0M17 31q7-7 14 0"/>
+    <circle cx="24" cy="38" r="2" fill="currentColor"/>
+  </symbol>
+  <symbol id="phone" viewBox="0 0 48 48">
+    <path d="M13 4l9 8-5 7c3 6 6 9 12 12l7-5 8 9-5 7c-3 4-8 3-13 1C15 37 7 29 3 18 1 13 1 9 5 6z"/>
+  </symbol>
+  <symbol id="pin" viewBox="0 0 48 48">
+    <path d="M24 45S7 27 7 17a17 17 0 1 1 34 0c0 10-17 28-17 28z"/>
+    <circle cx="24" cy="17" r="6"/>
+  </symbol>
+  <symbol id="bell" viewBox="0 0 48 48">
+    <path d="M8 34h32l-4-6V19a12 12 0 0 0-24 0v9zM19 40h10"/>
+  </symbol>
+  <symbol id="statement" viewBox="0 0 48 48">
+    <path d="M9 4h22l8 8v32H9zM31 4v9h8M15 22h17M15 29h17M15 36h12"/>
+  </symbol>
+  <symbol id="heart" viewBox="0 0 48 48">
+    <path d="M24 42S4 30 4 16C4 5 18 2 24 13 30 2 44 5 44 16 44 30 24 42 24 42z" fill="currentColor" stroke="none"/>
+  </symbol>
+</svg>
+
+<!-- الدخول -->
+<section id="loginScreen" class="screen active login-screen">
+  <button class="language" type="button">A / ع</button>
+
+  <svg class="login-brand" viewBox="0 0 400 190" aria-label="شعار تجريبي">
+    <text x="200" y="78" text-anchor="middle" font-size="76" fill="white">بنكك</text>
+    <path d="M292 24q23 8 34 29M302 13q31 11 42 35" stroke="#c6a329" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <text x="200" y="153" text-anchor="middle" font-size="73" fill="white"><tspan fill="#c6a329">b</tspan>ankak</text>
+  </svg>
+
+  <form class="login-form" onsubmit="event.preventDefault(); login();">
+    <label class="field">
+      <svg class="field-icon icon"><use href="#person"/></svg>
+      <input id="username" type="text" placeholder="أدخل رقم المعرف (رقم الحساب)" autocomplete="off">
+    </label>
+    <label class="field">
+      <svg class="field-icon icon"><use href="#eye"/></svg>
+      <input id="password" type="password" placeholder="أدخل كلمة المرور" autocomplete="off">
+    </label>
+    <button class="login-btn" type="submit">تسجيل الدخول</button>
+    <div class="login-links">
+      <span>تسجيل جديد؟</span>
+      <span>لا تستطيع تسجيل الدخول؟</span>
+    </div>
+    <div class="qr-row">
+      <svg class="icon"><use href="#qr"/></svg>
+      <span>شارك رمز</span>
+    </div>
+  </form>
+
+  <div class="login-footer">
+    <div class="footer-item">
+      <div class="footer-circle footer-red"><svg><use href="#pin"/></svg></div>
+      مواقعنا
+    </div>
+    <div class="footer-item">
+      <div class="footer-circle footer-green"><svg><use href="#phone"/></svg></div>
+      المساعدة
+    </div>
+    <div class="footer-item">
+      <div class="footer-circle footer-blue"><b style="font-size:26px">f</b></div>
+      فيس بوك
+    </div>
+  </div>
+</section>
+
+<!-- الرئيسية -->
+<section id="homeScreen" class="screen home-screen">
+  <header class="header">
+    <button class="header-action header-power" aria-label="خروج" onclick="goLogin()">⏻</button>
+    <svg class="brand" viewBox="0 0 400 190">
+      <text x="200" y="78" text-anchor="middle" font-size="76" fill="white">بنكك</text>
+      <text x="200" y="153" text-anchor="middle" font-size="73" fill="white"><tspan fill="#c6a329">b</tspan>ankak</text>
+    </svg>
+    <button class="header-action header-bell" aria-label="الإشعارات" onclick="demo()"><svg class="icon"><use href="#bell"/></svg></button>
+  </header>
+
+  <div class="greeting"><strong>المصمم ود نهر عطبرة</strong></div>
+
+  <div class="services">
+    <button class="service" onclick="openPage('accountScreen')">
+      <div class="service-icon"><svg class="icon"><use href="#person"/></svg></div>
+      <div class="service-title">تفاصيل<br>الحساب</div>
+    </button>
+    <button class="service" onclick="openPage('billsScreen')">
+      <div class="service-icon"><svg class="icon"><use href="#document"/></svg></div>
+      <div class="service-title">دفع فواتير</div>
+    </button>
+    <button class="service" onclick="openPage('transferScreen')">
+      <div class="service-icon"><svg class="icon"><use href="#transfer"/></svg></div>
+      <div class="service-title">تحويلات</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#cash"/></svg></div>
+      <div class="service-title">سحب<br>بدون بطاقة</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#qr"/></svg></div>
+      <div class="service-title">بنكك PAY</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#deposit"/></svg></div>
+      <div class="service-title">طلب الودائع<br>الاستثمارية</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#beneficiaries"/></svg></div>
+      <div class="service-title">إدارة<br>المستفيدين</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#statement"/></svg></div>
+      <div class="service-title">المعاملات<br>السابقة</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#card"/></svg></div>
+      <div class="service-title">إدارة البطاقات</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#document"/></svg></div>
+      <div class="service-title">الطلبات</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#transfer"/></svg></div>
+      <div class="service-title">أمر دفع دائم</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#settings"/></svg></div>
+      <div class="service-title">الضبط</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#cash"/></svg></div>
+      <div class="service-title">خدمات<br>العملات</div>
+    </button>
+    <button class="service" onclick="demo()">
+      <div class="service-icon"><svg class="icon"><use href="#shop"/></svg></div>
+      <div class="service-title">التجارة<br>الإلكترونية</div>
+    </button>
+  </div>
+</section>
+
+<!-- تفاصيل الحساب -->
+<section id="accountScreen" class="screen">
+  <header class="header">
+    <button class="header-action header-info" onclick="demo()">i</button>
+    <svg class="brand" viewBox="0 0 400 190">
+      <text x="200" y="78" text-anchor="middle" font-size="76" fill="white">بنكك</text>
+      <text x="200" y="153" text-anchor="middle" font-size="73" fill="white"><tspan fill="#c6a329">b</tspan>ankak</text>
+    </svg>
+    <button class="header-action header-menu" aria-label="القائمة" onclick="demo()"><span></span><span></span><span></span></button>
+  </header>
+  <div class="page-title">تفاصيل الحساب<button class="back-btn" onclick="goHome()">رجوع ❮</button></div>
+
+  <div class="accounts">
+    <div class="account-card">
+      <div class="account-main">
+        <div class="account-symbol"><svg class="icon"><use href="#deposit"/></svg></div>
+        <div class="account-data">
+          <div class="account-name">حسابات الودائع لأجل</div>
+          <div class="account-number">008X180984410001 - A/C</div>
+        </div>
+        <div class="account-balance">23,054,567</div>
+      </div>
+      <div class="account-actions">
+        <button class="account-action" onclick="demo()">عرض كشف الحساب <svg class="icon"><use href="#statement"/></svg></button>
+        <button class="account-action" onclick="demo()">التفاصيل <svg class="icon"><use href="#document"/></svg></button>
+      </div>
+    </div>
+
+    <div class="account-card">
+      <div class="account-main">
+        <div class="account-symbol"><svg class="icon"><use href="#cash"/></svg></div>
+        <div class="account-data">
+          <div class="account-name">حساب توفير</div>
+          <div class="account-number">1083080984410001<br>IBAN - SD0204080984410001</div>
+        </div>
+        <div class="account-balance">200,073,865</div>
+      </div>
+      <div class="account-actions">
+        <button class="account-action" onclick="demo()">عرض كشف الحساب <svg class="icon"><use href="#statement"/></svg></button>
+        <button class="account-action" onclick="demo()">رمز الدفع السريع QR <svg class="icon"><use href="#qr"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- دفع الفواتير -->
+<section id="billsScreen" class="screen">
+  <header class="header">
+    <button class="header-action header-info" onclick="demo()">i</button>
+    <svg class="brand" viewBox="0 0 400 190">
+      <text x="200" y="78" text-anchor="middle" font-size="76" fill="white">بنكك</text>
+      <text x="200" y="153" text-anchor="middle" font-size="73" fill="white"><tspan fill="#c6a329">b</tspan>ankak</text>
+    </svg>
+    <button class="header-action header-menu" aria-label="القائمة" onclick="demo()"><span></span><span></span><span></span></button>
+  </header>
+  <div class="page-title">دفع فواتير<button class="back-btn" onclick="goHome()">رجوع ❮</button></div>
+  <div class="bill-tabs">
+    <button class="bill-tab active" onclick="setBillTab(this)">الفواتير</button>
+    <button class="bill-tab" onclick="setBillTab(this)">دفع مباشر</button>
+  </div>
+  <div class="bill-grid">
+    <button class="bill-card" onclick="demo()"><span class="bill-name">اتصالات/إنترنت</span><span class="bill-icon-circle"><svg class="icon-fill"><use href="#internet"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">شراء الكهرباء</span><span class="bill-icon-circle"><svg class="icon-fill"><use href="#electric"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">خطوط الطيران</span><span class="bill-icon-circle"><svg class="icon-fill"><use href="#plane"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">التعليم</span><span class="bill-icon-circle"><svg class="icon-fill"><use href="#education"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">التسوق عبر الإنترنت</span><span class="bill-icon-circle"><svg class="icon"><use href="#cart"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">خدمات حكومية</span><span class="bill-icon-circle"><svg class="icon"><use href="#house"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">الوقود</span><span class="bill-icon-circle"><svg class="icon"><use href="#fuel"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">وسائل النقل</span><span class="bill-icon-circle"><svg class="icon"><use href="#truck"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">خدمات أخرى</span><span class="bill-icon-circle"><svg class="icon"><use href="#document"/></svg></span></button>
+    <button class="bill-card" onclick="demo()"><span class="bill-name">التبرعات</span><span class="bill-icon-circle"><svg class="icon-fill"><use href="#heart"/></svg></span></button>
+  </div>
+</section>
+
+<!-- التحويلات -->
+<section id="transferScreen" class="screen">
+  <header class="header">
+    <button class="header-action header-info" onclick="demo()">i</button>
+    <svg class="brand" viewBox="0 0 400 190">
+      <text x="200" y="78" text-anchor="middle" font-size="76" fill="white">بنكك</text>
+      <text x="200" y="153" text-anchor="middle" font-size="73" fill="white"><tspan fill="#c6a329">b</tspan>ankak</text>
+    </svg>
+    <button class="header-action header-menu" aria-label="القائمة" onclick="demo()"><span></span><span></span><span></span></button>
+  </header>
+  <div class="page-title">تحويلات<button class="back-btn" onclick="goHome()">رجوع ❮</button></div>
+  <div class="transfer-list">
+    <button class="transfer-card" onclick="demo()"><span class="transfer-arrow">❮</span><span>حسابات أخرى</span><svg class="icon"><use href="#deposit"/></svg></button>
+    <button class="transfer-card" onclick="demo()"><span class="transfer-arrow">❮</span><span>الدفع عبر الموبايل</span><svg class="icon"><use href="#phone"/></svg></button>
+    <button class="transfer-card" onclick="demo()"><span class="transfer-arrow">❮</span><span>تحويل لبنك آخر (باستخدام رقم البطاقة)</span><svg class="icon"><use href="#card"/></svg></button>
+  </div>
+</section>
+
+<!-- رسالة توضيحية -->
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3>واجهة تجريبية</h3>
+    <p id="modalText">هذه الخاصية غير مفعلة في هذا النموذج.</p>
+    <button onclick="closeModal()">إغلاق</button>
+  </div>
+</div>
+
+<script>
+function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  if (!username || !password) {
+    showMessage(!username && !password
+      ? 'يرجى إدخال رقم الحساب وكلمة المرور.'
+      : !username
+        ? 'يرجى إدخال رقم الحساب.'
+        : 'يرجى إدخال كلمة المرور.');
+    return;
+  }
+
+  openPage('homeScreen');
+}
+
+function openPage(id) {
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active');
+  });
+  const page = document.getElementById(id);
+  if (page) {
+    page.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+}
+
+function goHome() { openPage('homeScreen'); }
+function goLogin() { openPage('loginScreen'); }
+
+function showMessage(message) {
+  document.getElementById('modalText').textContent = message;
+  document.getElementById('modal').classList.add('show');
+}
+
+function demo() {
+  showMessage('هذه خاصية توضيحية في النموذج التجريبي فقط، ولا تنفذ معاملة مصرفية حقيقية.');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+function setBillTab(button) {
+  document.querySelectorAll('.bill-tab').forEach(tab => tab.classList.remove('active'));
+  button.classList.add('active');
+  if (button.textContent.trim() === 'دفع مباشر') {
+    showMessage('تبويب الدفع المباشر للعرض التجريبي فقط.');
+  }
+}
+
+document.getElementById('modal').addEventListener('click', event => {
+  if (event.target.id === 'modal') closeModal();
+});
+
+document.getElementById('password').addEventListener('keydown', event => {
+  if (event.key === 'Enter') login();
+});
+</script>
+
+</body>
+</html>
